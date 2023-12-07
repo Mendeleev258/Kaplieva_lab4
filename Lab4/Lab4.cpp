@@ -24,7 +24,7 @@ int main()
 {
 	setlocale(LC_ALL, "Russian");
 	srand(time(NULL));
-	
+	// test
 	int choice1;
 	do
 	{
