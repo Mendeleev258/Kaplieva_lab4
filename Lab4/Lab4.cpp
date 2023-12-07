@@ -1,6 +1,5 @@
 ﻿#include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <functional>
 
 
@@ -8,7 +7,10 @@ template<typename T, typename Predicat>
 void validation(T& x, T& y, Predicat condition, const char* message);
 template<typename T, typename Predicat>
 void validation(T& x, Predicat condition, const char* message);
+int checkfile(std::ifstream& file);
 
+int main_menu();
+int task_menu();
 void ending(int n);
 
 int task1(int n, std::istream& stream);
@@ -22,10 +24,110 @@ int main()
 {
 	setlocale(LC_ALL, "Russian");
 	srand(time(NULL));
+	
+	int choice1;
+	do
+	{
+		choice1 = main_menu();
+		switch (choice1)
+		{
+		case 1:
+		{
+			int choice2 = task_menu();
+			int n; // количество элементов
+			switch (choice2)
+			{
+			case 1:
+			{
+				validation(n, [](int x) {return x > 0; }, "Введите количество элементов последовательности");
+				std::cout << "Введите последовательность:\n";
+				int res = task1(n, std::cin);
+				std::cout << "Ответ: " << res << '\n';
+			}
+			break;
+			case 2:
+			{
+				std::ifstream file("data.txt");
+				if (checkfile(file) == 1)
+				{
+					int res = task1(13, file);
+					std::cout << "Ответ: " << res << '\n';
+				}
+				else
+				{
+					if (checkfile(file) == 0)
+						std::cout << "Файл пуст!\n";
+					else
+						std::cout << "Ошибка открытия файла!\n";
+				}
+				file.close();
+			}
+			break;
+			default:
+			{
+				int a, b;
+				validation(a, b, [](int x, int y) {return y >= x; }, "Введите диапазон [a, b]");
+				validation(n, [](int x) {return x > 0; }, "Введите количество элементов последовательности");
+				int res = task1(n, a, b);
+				std::cout << "Ответ: " << res << '\n';
+			}
+			break;
+			}
 
-	std::ifstream file;
-	file.open("data.txt");
-	std::cout << task2(13, 0, 10);
+		}
+		break;
+		case 2:
+		{
+			int choice2 = task_menu();
+			int n; // количество элементов
+			switch (choice2)
+			{
+			case 1:
+			{
+				validation(n, [](int x) {return x > 0; }, "Введите количество элементов последовательности");
+				std::cout << "Введите последовательность:\n";
+				int res = task2(n, std::cin);
+				std::cout << "Ответ: " << res << '\n';
+			}
+			break;
+			case 2:
+			{
+				std::ifstream file("data.txt");
+				if (checkfile(file) == 1)
+				{
+					int res = task2(13, file);
+					std::cout << "Ответ: " << res << '\n';
+				}
+				else
+				{
+					if (checkfile(file) == 0)
+						std::cout << "Файл пуст!\n";
+					else
+						std::cout << "Ошибка открытия файла!\n";
+				}
+				file.close();
+			}
+			break;
+			default:
+			{
+				int a, b;
+				validation(a, b, [](int x, int y) {return y >= x; }, "Введите диапазон [a, b]");
+				validation(n, [](int x) {return x > 0; }, "Введите количество элементов последовательности");
+				int res = task2(n, a, b);
+				std::cout << "Ответ: " << res << '\n';
+			}
+			break;
+			}
+		}
+		break;
+		default:
+		{
+			choice1 = 3;
+		}
+		break;
+		}
+		
+	} while (choice1 != 3);
 }
 
 
@@ -87,7 +189,8 @@ int task2(int n, std::istream& stream)
 	for (int i = 0; i < n; ++i)
 	{
 		stream >> x;
-		sum += x;
+		if (x > 0)
+			sum += x;
 		if (x == 7)
 		{
 			if (cnt > 0)
@@ -115,7 +218,8 @@ int task2(int n, int a, int b)
 	{
 		x = rand() % (b - a) + a;
 		std::cout << x << ' ';
-		sum += x;
+		if (x > 0)
+			sum += x;
 		if (x == 7)
 		{
 			if (cnt > 0)
@@ -164,4 +268,49 @@ void validation(T& x, Predicat condition, const char* message)
 		std::cin.ignore(std::cin.rdbuf()->in_avail());
 		std::cout << message << "\n>>> ";
 	}
+}
+
+int checkfile(std::ifstream& file)
+{
+	int res = 1;
+	if (!file)
+	{
+		res = -1;
+	}
+	else
+		if (file.peek() == EOF)
+			res = 0;
+	return res;
+}
+
+int main_menu()
+{
+	std::cout << "-----------------------------------------------------\n";
+	std::cout << "1. Найти количество четных элементов, расположенных после последнего минимального\n";
+	std::cout << "2. Найти сумму положительных чисел, расположенных между первым и последним числами кратными 7\n";
+	std::cout << "3. Выход из программы\n";
+	std::cout << "-----------------------------------------------------\n";
+	
+	std::function<bool(int)> foo;
+	foo = [](int x)->bool {return x >= 1 && x <= 3; };
+	int choice;
+	validation(choice, foo, "");
+	std::cin.ignore(std::cin.rdbuf()->in_avail());
+	return choice;
+}
+
+int task_menu()
+{
+	std::cout << "-------------------------\n";
+	std::cout << "1. Ввод с клавиатуры\n";
+	std::cout << "2. Ввод из файла\n";
+	std::cout << "3. Случайным образом\n";
+	std::cout << "------------------------\n";
+
+	std::function<bool(int)> foo;
+	foo = [](int x)->bool {return x >= 1 && x <= 3; };
+	int choice;
+	validation(choice, foo, "Выберите способ ввода");
+	std::cin.ignore(std::cin.rdbuf()->in_avail());
+	return choice;
 }
